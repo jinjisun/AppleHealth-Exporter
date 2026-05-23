@@ -1,0 +1,23 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+
+# Python
+__pycache__/
+.venv/
+venv/
+*.pyc
+
+# Data
+health_data.csv
+
+# IPA artifacts (local)
+*.ipa
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
