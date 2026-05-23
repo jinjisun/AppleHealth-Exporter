@@ -23,8 +23,9 @@ jobs:
           xcodebuild -list -project AppleHealthExporter.xcodeproj
 
       - name: Build unsigned app
+        shell: bash
         run: |
-          set -euo pipefail
+          set -eo pipefail
           xcodebuild \
             -project AppleHealthExporter.xcodeproj \
             -scheme AppleHealthExporter \
@@ -40,9 +41,11 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER= \
             PROVISIONING_PROFILE= \
             build 2>&1 | tee xcodebuild.log
+          exit "${PIPESTATUS[0]}"
 
       - name: Print build errors on failure
         if: failure()
+        shell: bash
         run: |
           echo "=== error: lines ==="
           grep -E "error:|fatal error:" xcodebuild.log || true
