@@ -1,0 +1,58 @@
+name: Build Unsigned IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - 'AppleHealthExporter/**'
+      - 'AppleHealthExporter.xcodeproj/**'
+      - '.github/workflows/build-unsigned.yml'
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build unsigned app
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project AppleHealthExporter.xcodeproj \
+            -scheme AppleHealthExporter \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build/DerivedData \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package unsigned IPA
+        run: |
+          set -euo pipefail
+          APP_NAME="AppleHealthExporter"
+          APP_PATH=$(find build/DerivedData -name "${APP_NAME}.app" -type d | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Could not find ${APP_NAME}.app"
+            find build -type d -name "*.app"
+            exit 1
+          fi
+          echo "Found app at: $APP_PATH"
+          mkdir -p dist/Payload
+          cp -R "$APP_PATH" "dist/Payload/${APP_NAME}.app"
+          cd dist
+          zip -r "../${APP_NAME}.ipa" Payload
+          cd ..
+          ls -la "${APP_NAME}.ipa"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AppleHealthExporter-unsigned-ipa
+          path: AppleHealthExporter.ipa
+          if-no-files-found: error
