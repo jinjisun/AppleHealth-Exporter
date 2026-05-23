@@ -114,7 +114,6 @@ enum HealthDataCatalog {
     @available(iOS 16.0, *)
     private static let quantityMetricsIOS16: [MetricDefinition] = [
         q("wrist_temperature", "手腕温度", .appleSleepingWristTemperature, "°C", .degreeCelsius()),
-        q("atrial_fibrillation_burden", "房颤负担", .atrialFibrillationBurden, "%", .percent()),
         q("running_power", "跑步功率", .runningPower, "W", HKUnit.internationalUnit(withSymbol: "W")),
         q("running_speed", "跑步速度", .runningSpeed, "m/s", .meter().unitDivided(by: .second())),
         q("running_stride_length", "跑步步幅", .runningStrideLength, "m", .meter()),

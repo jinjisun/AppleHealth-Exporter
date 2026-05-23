@@ -48,6 +48,8 @@ jobs:
           grep -E "error:|fatal error:" xcodebuild.log || true
           echo "=== signing: lines ==="
           grep -iE "codesign|entitlement|provision" xcodebuild.log || true
+          echo "=== log tail ==="
+          tail -n 120 xcodebuild.log || true
 
       - name: Package unsigned IPA
         run: |

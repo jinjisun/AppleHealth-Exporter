@@ -35,7 +35,6 @@ struct HealthRecord: Codable {
     }
 }
 
-@MainActor
 final class HealthKitManager: ObservableObject {
     @Published var progress: Double = 0
     @Published var statusMessage = "就绪"
@@ -58,6 +57,7 @@ final class HealthKitManager: ObservableObject {
         HKHealthStore.isHealthDataAvailable()
     }
 
+    @MainActor
     func requestAuthorization() async throws {
         guard isHealthDataAvailable else {
             throw SyncError.healthKitUnavailable
@@ -65,6 +65,7 @@ final class HealthKitManager: ObservableObject {
         try await healthStore.requestAuthorization(toShare: [], read: HealthDataCatalog.objectTypesForAuthorization)
     }
 
+    @MainActor
     func syncAll(to host: String) async throws {
         guard isHealthDataAvailable else {
             throw SyncError.healthKitUnavailable
@@ -149,6 +150,18 @@ final class HealthKitManager: ObservableObject {
 
     // MARK: - Fetch
 
+    private nonisolated func resumeContinuation<T>(
+        _ continuation: CheckedContinuation<T, Error>,
+        error: Error?,
+        samples: T
+    ) {
+        if let error {
+            continuation.resume(throwing: error)
+        } else {
+            continuation.resume(returning: samples)
+        }
+    }
+
     private func fetchRecords(for metric: HealthDataCatalog.MetricDefinition, predicate: NSPredicate?) async throws -> [HealthRecord] {
         switch metric.kind {
         case .quantity(let id):
@@ -177,11 +190,7 @@ final class HealthKitManager: ObservableObject {
                 limit: HKObjectQueryNoLimit,
                 sortDescriptors: [sort]
             ) { _, samples, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-                continuation.resume(returning: (samples as? [HKQuantitySample]) ?? [])
+                resumeContinuation(continuation, error: error, samples: samples as? [HKQuantitySample] ?? [])
             }
             healthStore.execute(query)
         }
@@ -196,11 +205,7 @@ final class HealthKitManager: ObservableObject {
                 limit: HKObjectQueryNoLimit,
                 sortDescriptors: [sort]
             ) { _, samples, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-                continuation.resume(returning: (samples as? [HKCategorySample]) ?? [])
+                resumeContinuation(continuation, error: error, samples: samples as? [HKCategorySample] ?? [])
             }
             healthStore.execute(query)
         }
@@ -215,11 +220,7 @@ final class HealthKitManager: ObservableObject {
                 limit: HKObjectQueryNoLimit,
                 sortDescriptors: [sort]
             ) { _, samples, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-                continuation.resume(returning: (samples as? [HKWorkout]) ?? [])
+                resumeContinuation(continuation, error: error, samples: samples as? [HKWorkout] ?? [])
             }
             healthStore.execute(query)
         }
