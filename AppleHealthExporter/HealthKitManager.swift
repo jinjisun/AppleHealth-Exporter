@@ -189,8 +189,8 @@ final class HealthKitManager: ObservableObject {
                 predicate: predicate,
                 limit: HKObjectQueryNoLimit,
                 sortDescriptors: [sort]
-            ) { _, samples, error in
-                resumeContinuation(continuation, error: error, samples: samples as? [HKQuantitySample] ?? [])
+            ) { [self] _, samples, error in
+                self.resumeContinuation(continuation, error: error, samples: samples as? [HKQuantitySample] ?? [])
             }
             healthStore.execute(query)
         }
@@ -204,8 +204,8 @@ final class HealthKitManager: ObservableObject {
                 predicate: predicate,
                 limit: HKObjectQueryNoLimit,
                 sortDescriptors: [sort]
-            ) { _, samples, error in
-                resumeContinuation(continuation, error: error, samples: samples as? [HKCategorySample] ?? [])
+            ) { [self] _, samples, error in
+                self.resumeContinuation(continuation, error: error, samples: samples as? [HKCategorySample] ?? [])
             }
             healthStore.execute(query)
         }
@@ -219,8 +219,8 @@ final class HealthKitManager: ObservableObject {
                 predicate: predicate,
                 limit: HKObjectQueryNoLimit,
                 sortDescriptors: [sort]
-            ) { _, samples, error in
-                resumeContinuation(continuation, error: error, samples: samples as? [HKWorkout] ?? [])
+            ) { [self] _, samples, error in
+                self.resumeContinuation(continuation, error: error, samples: samples as? [HKWorkout] ?? [])
             }
             healthStore.execute(query)
         }
@@ -238,38 +238,46 @@ final class HealthKitManager: ObservableObject {
             ))
         }
 
-        let sex = healthStore.biologicalSex()
-        if sex != .notSet {
-            records.append(HealthRecord(
-                type: "biological_sex", value: "\(sex.rawValue)", unit: "enum",
-                startDate: now, endDate: now, source: "HealthKit", metadata: nil
-            ))
-        }
-
-        let blood = healthStore.bloodType()
-        if blood != .notSet {
-            records.append(HealthRecord(
-                type: "blood_type", value: "\(blood.rawValue)", unit: "enum",
-                startDate: now, endDate: now, source: "HealthKit", metadata: nil
-            ))
-        }
-
-        if #available(iOS 13.0, *) {
-            let skin = healthStore.fitzpatrickSkinType()
-            if skin != .notSet {
+        if let sexObject = try? healthStore.biologicalSex() {
+            let sex = sexObject.biologicalSex
+            if sex != .notSet {
                 records.append(HealthRecord(
-                    type: "fitzpatrick_skin_type", value: "\(skin.rawValue)", unit: "enum",
+                    type: "biological_sex", value: "\(sex.rawValue)", unit: "enum",
                     startDate: now, endDate: now, source: "HealthKit", metadata: nil
                 ))
             }
         }
 
-        let wheelchair = healthStore.wheelchairUse()
-        if wheelchair != .notSet {
-            records.append(HealthRecord(
-                type: "wheelchair_use", value: "\(wheelchair.rawValue)", unit: "enum",
-                startDate: now, endDate: now, source: "HealthKit", metadata: nil
-            ))
+        if let bloodObject = try? healthStore.bloodType() {
+            let blood = bloodObject.bloodType
+            if blood != .notSet {
+                records.append(HealthRecord(
+                    type: "blood_type", value: "\(blood.rawValue)", unit: "enum",
+                    startDate: now, endDate: now, source: "HealthKit", metadata: nil
+                ))
+            }
+        }
+
+        if #available(iOS 13.0, *) {
+            if let skinObject = try? healthStore.fitzpatrickSkinType() {
+                let skin = skinObject.skinType
+                if skin != .notSet {
+                    records.append(HealthRecord(
+                        type: "fitzpatrick_skin_type", value: "\(skin.rawValue)", unit: "enum",
+                        startDate: now, endDate: now, source: "HealthKit", metadata: nil
+                    ))
+                }
+            }
+        }
+
+        if let wheelchairObject = try? healthStore.wheelchairUse() {
+            let wheelchair = wheelchairObject.wheelchairUse
+            if wheelchair != .notSet {
+                records.append(HealthRecord(
+                    type: "wheelchair_use", value: "\(wheelchair.rawValue)", unit: "enum",
+                    startDate: now, endDate: now, source: "HealthKit", metadata: nil
+                ))
+            }
         }
 
         return records
