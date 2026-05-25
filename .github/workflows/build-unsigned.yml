@@ -36,7 +36,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="-" \
-            CODE_SIGN_ENTITLEMENTS=AppleHealthExporter/AppleHealthExporter-CI.entitlements \
+            CODE_SIGN_ENTITLEMENTS=AppleHealthExporter/AppleHealthExporter.entitlements \
             DEVELOPMENT_TEAM= \
             PROVISIONING_PROFILE_SPECIFIER= \
             PROVISIONING_PROFILE= \
