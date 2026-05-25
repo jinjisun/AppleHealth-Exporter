@@ -69,15 +69,15 @@ jobs:
           # 终极暴力破解：无视外部文件，直接在打包前强制写入 HealthKit 权限！
           ENT_DST="${APP_PATH}/archived-expanded-entitlements.xcent"
           cat << 'EOF' > "$ENT_DST"
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>com.apple.developer.healthkit</key>
-    <true/>
-</dict>
-</plist>
-EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>com.apple.developer.healthkit</key>
+              <true/>
+          </dict>
+          </plist>
+          EOF
           echo "Forced HealthKit entitlements into app bundle"
 
           mkdir -p dist/Payload
